@@ -63,12 +63,12 @@
  *         12: DARKBLUE,  13: DARKGREEN,  14: GRAY,   15: DARKGRAY
  */
 #define MARLIN_BKCOLOR 1
-#define MARLIN_FNCOLOR 0
+#define MARLIN_FNCOLOR 3
 
 /**
  * Text displayed at the top of the TFT in Marlin Mode.
  */
-#define MARLIN_BANNER_TEXT "LCD12864 Simulator"
+#define MARLIN_BANNER_TEXT ""
 
 /**
  * show banner text at the top of the TFT in Marlin Mode.
@@ -80,7 +80,7 @@
  * Options:  0: Disabled. RECOMMENDED FOR TFT24
  *           1: Enabled Marlin Fullscreen mode.
  */
-#define DEFAULT_ST7920_FULLSCREEN_MODE 0 // 0: Disabled. RECOMMENDED FOR TFT24
+#define DEFAULT_ST7920_FULLSCREEN_MODE 1 // 0: Disabled. RECOMMENDED FOR TFT24
 
 /**
  * Keep Serial always On (ONLY SUPPORTED ON TFT24 V1.1, TFT35 V3.0, AND TFT28 V3.0)
@@ -91,7 +91,7 @@
  *
  * Options:  0: Disabled    1: Enabled
  */
-#define SERIAL_ALWAYS_ON 0  // Default: 0 (Disabled)
+#define SERIAL_ALWAYS_ON 1  // Default: 0 (Disabled)
 
 //===========================================================================
 //========================== Touch Mode Settings ============================
@@ -105,7 +105,7 @@
  *
  * :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000]
  */
-#define BAUDRATE 115200
+#define BAUDRATE 250000
 
 /**
  * Default Touch Mode Language
@@ -206,9 +206,9 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 235
-#define Y_MAX_POS 235
-#define Z_MAX_POS 250
+#define X_MAX_POS 120
+#define Y_MAX_POS 120
+#define Z_MAX_POS 120
 
 // Specify a pause position as { X, Y, Z_raise }
 #define NOZZLE_PAUSE_RETRACT_LENGTH 15   // (mm)
