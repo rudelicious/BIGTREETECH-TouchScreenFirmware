@@ -1,13 +1,17 @@
 #ifndef _PARSEACK_H_
 #define _PARSEACK_H_
 
-#include "stdint.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdint.h>
 #include "Configuration.h"
 
 static const char errormagic[]         = "Error:";
 static const char echomagic[]          = "echo:";
 
-#define ACK_MAX_SIZE 2048
+#define ACK_MAX_SIZE 512
 
 typedef enum                      // popup message types available to display an echo message
 {
@@ -47,6 +51,10 @@ void parseACK(void);
 void parseRcvGcode(void);
 
 void setIgnoreEcho(ECHO_ID msgId, bool state);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

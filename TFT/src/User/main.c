@@ -7,17 +7,15 @@ CLOCKS mcuClocks; // system clocks: SYSCLK, AHB, APB1, APB2, APB1_Timer, APB2_Ti
 void mcu_GetClocksFreq(CLOCKS *clk)
 {
   RCC_GetClocksFreq(&clk->rccClocks);
-  if (clk->rccClocks.PCLK1_Frequency < clk->rccClocks.HCLK_Frequency) { // if (APBx presc = 1) x1 else x2
+  if (clk->rccClocks.PCLK1_Frequency < clk->rccClocks.HCLK_Frequency) // if (APBx presc = 1) x1 else x2
     clk->PCLK1_Timer_Frequency = clk->rccClocks.PCLK1_Frequency * 2;
-  } else {
+  else
     clk->PCLK1_Timer_Frequency = clk->rccClocks.PCLK1_Frequency;
-  }
 
-  if (clk->rccClocks.PCLK2_Frequency < clk->rccClocks.HCLK_Frequency) {
+  if (clk->rccClocks.PCLK2_Frequency < clk->rccClocks.HCLK_Frequency)
     clk->PCLK2_Timer_Frequency = clk->rccClocks.PCLK2_Frequency * 2;
-  } else {
+  else
     clk->PCLK2_Timer_Frequency = clk->rccClocks.PCLK2_Frequency;
-  }
 }
 
 void Hardware_GenericInit(void)
@@ -36,30 +34,35 @@ void Hardware_GenericInit(void)
     GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE); //disable JTAG & SWD
   #endif
 
-  #if defined(MKS_32_V1_4)
+  #if defined(MKS_32_V1_4) || defined (MKS_28_V1_0)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
     GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE);
   #endif
 
   XPT2046_Init();
-  OS_TimerInitMs();  // System clock timer, cycle 1ms, called after XPT2046_Init()
+  OS_TimerInitMs();         // System clock timer, cycle 1ms, called after XPT2046_Init()
   W25Qxx_Init();
   LCD_Init();
-  readStoredPara(); // Read settings parameter
-  LCD_RefreshDirection();  //refresh display direction after reading settings
-  scanUpdates();           // scan icon, fonts and config files
+  readStoredPara();         // Read settings parameter
+  LCD_RefreshDirection();   // refresh display direction after reading settings
+  scanUpdates();            // scan icon, fonts and config files
+  checkflashSign();         // check font/icon/config signature in SPI flash for update
+  initMachineSetting();     // load default machine settings
 
   #ifdef LED_COLOR_PIN
     knob_LED_Init();
   #endif
 
-  #if !defined(MKS_32_V1_4)
+  #if !defined(MKS_32_V1_4) && !defined (MKS_28_V1_0)
     //causes hang if we deinit spi1
     SD_DeInit();
   #endif
 
   #if LCD_ENCODER_SUPPORT
     HW_EncoderInit();
+  #endif
+  #if ENC_ACTIVE_SIGNAL
+    HW_EncActiveSignalInit();
   #endif
 
   #ifdef PS_ON_PIN
@@ -87,8 +90,7 @@ void Hardware_GenericInit(void)
   #ifdef LCD_LED_PWM_CHANNEL
     Set_LCD_Brightness(LCD_BRIGHTNESS[infoSettings.lcd_brightness]);
   #endif
-  GUI_RestoreColorDefault();
-  infoMenuSelect();
+  switchMode();
 }
 
 int main(void)

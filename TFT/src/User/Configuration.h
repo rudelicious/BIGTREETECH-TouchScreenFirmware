@@ -1,9 +1,15 @@
-#ifndef _CONFIGRATION_H_
-#define _CONFIGRATION_H_
-#define CONFIG_VERSION 20200810
+#ifndef _CONFIGURATION_H_
+#define _CONFIGURATION_H_
+#define CONFIG_VERSION 20201218
 //===========================================================================
 //============================= General Settings ============================
 //===========================================================================
+
+/**
+ * To work with RepRapFirmware, Add M575 P1 S2 B115200 to the end of config.g file in sd card
+ * uncomment for RepRapFirmware
+*/
+//#define RepRapFirmware
 
 /**
  * Default Mode
@@ -11,10 +17,10 @@
  * Mode switching is still possible by holding down the encorder for two seconds.
  *
  * Options:
- * ST7920_SPI // Marlin Mode
- * SERIAL_TSC // Touch Mode
+ * MODE_MARLIN // Marlin Mode
+ * MODE_SERIAL_TSC // Touch Mode
  */
-#define DEFAULT_LCD_MODE SERIAL_TSC
+#define DEFAULT_LCD_MODE MODE_SERIAL_TSC
 
 /**
  * Default Startup Knob LED Color (TFT35 E3)
@@ -103,16 +109,25 @@
  * you commonly experience drop-outs during host printing.
  * You may try up to 1000000 to speed up SD file transfer.
  *
- * :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000]
+ * :[2400: 0, 9600: 1, 19200: 2, 38400: 3, 57600: 4, 115200: 5, 250000: 6, 500000: 7, 1000000: 8]
  */
-#define BAUDRATE 250000
+#define BAUDRATE 5
 
 /**
- * Default Touch Mode Language
+ * Default Primary Language (for Touch-Mode only)
  * Select the language to display on the LCD while in Touch Mode.
- * Options: ARMENIAN, CHINESE, CZECH, DUTCH, ENGLISH, FRENCH, GERMAN, HUNGARIAN, ITALIAN, JAPANESE, POLISH, PORTUGUESE, RUSSIAN, SLOVAK, SPAIN, CATALAN
+ * Options: ENGLISH, CHINESE, RUSSIAN, JAPANESE, ARMENIAN, GERMAN, CZECH,
+ *          SPANISH, FRENCH, PORTUGUESE, ITALIAN, POLISH, SLOVAK, DUTCH,
+ *          HUNGARIAN, TURKISH, GREEK, SLOVENIAN, CATALAN, TRAD_CHINESE,
+ *          UKRAINIAN,
  */
 #define DEFAULT_LANGUAGE ENGLISH
+
+/**
+ * To add/flash a second language copy the required "language_xx.ini" file from
+ * "Language Packs" folder to the SD root folder. Then preset the reset button
+ * to load/flash the copied language file.
+*/
 
 /**
  * Show bootscreen when starting up
@@ -170,6 +185,8 @@
 #define HOTEND_NUM   1    // set in 1~6
 #define EXTRUDER_NUM 1    // set in 1~6
 #define FAN_NUM      1    // set in 1~6
+#define FAN_CTRL_NUM 0    // set in 1~2
+#define MIXING_EXTRUDER 0 // set default 0, for mixing_extruder 1 (this option turns off autodetection of the number of extruders)
 
 #define PREHEAT_LABELS   {"PLA", "PETG", "ABS", "WOOD", "TPU", "NYLON"}
 #define PREHEAT_HOTEND   {200,   240,    230,   170,    220,   250}
@@ -184,9 +201,19 @@
 #define TOOL_CHANGE      {"T0",   "T1",      "T2",      "T3",      "T4",      "T5"}
 #define EXTRUDER_ID      {"E0",   "E1",      "E2",      "E3",      "E4",      "E5"}
 
-#define FAN_MAX_PWM      {255,       255,       255,       255,       255,       255}
-#define FAN_DISPLAY_ID   {"F0",      "F1",      "F2",      "F3",      "F4",      "F5"}
-#define FAN_CMD          {"M106 P0", "M106 P1", "M106 P2", "M106 P3", "M106 P4", "M106 P5" };
+/**
+ * Fan control
+ *
+ * Fan type Options:
+ *               0: FAN_TYPE_F       - default cooling fan speed (Check Marlin GCode M106)
+ *               1: FAN_TYPE_CTRL_S  - Controller fan speed for stepper or hot bed ON (Check Marlin GCode M710)
+ *               2: FAN_TYPE_CTRL_I  - Controller fan idle speed  (Check Marlin gcode - M710)
+ *               8: FAN_TYPE_UNKNOWN - Unknown / Not defined
+ */
+#define FAN_MAX_PWM      {       255,       255,       255,       255,       255,       255,       255,       255 };
+#define FAN_DISPLAY_ID   {      "F0",      "F1",      "F2",      "F3",      "F4",      "F5",     "CtL",     "CtI" };
+#define FAN_CMD          { "M106 P0", "M106 P1", "M106 P2", "M106 P3", "M106 P4", "M106 P5",    "M710",    "M710" };
+#define FAN_TYPE         {         0,         0,         0,         0,         0,         0,         1,         2 };
 
 #define SPEED_ID         {"Sp.", "Fr."}
 
@@ -227,27 +254,36 @@
 #define NOZZLE_PAUSE_M600_M601
 
 /**
- * Auto Save Load Leveling Data
- * The TFT will auto detect if Auto Bed Level is available.
- * Enable this will send "M500" after "G29" to store leveling value
- * and send "M420 S1" to enable leveling state after startup
+ * M701, M702 ; Marlin filament load unload gcodes support
+ * FILAMENT_LOAD_UNLOAD_GCODES option on Marlin configuration_adv.h need to be uncommented
+ * Adds a submenu to the movement menu for selecting load and unload actions
  */
-#define AUTO_SAVE_LOAD_LEVELING_VALUE true //to enabled: true | to disabled: false
+#define LOAD_UNLOAD_M701_M702
 
 /**
- * Enable Unified Bed Leveling options
- * Will attempt to auto detect and enable specific UBL options.
+ * Auto save/load Bed Leveling data
+ * The TFT will auto detect if BL data are available.
+ * Enable this will send "M500" after "G29" to store leveling value
+ * and send "M420 S1" to enable leveling state after startup
+ *
+ * Options:  0: Disabled    1: Enabled
+ */
+#define AUTO_SAVE_LOAD_BL_VALUE 1
+
+/**
+ * Enable Bed Leveling options
+ * Will attempt to auto detect and/or enable specific BL options.
  *
  * WARNING - If you're not sure, leave on auto-detect or disabled.
  *           UBL has extra options other leveling systems might not have.
  *
- * Options:  0: Disabled    1: Enabled    2: Auto-detect [default]
+ * Options:  0: Disabled    1: Auto-detect [default]    2: ABL    3: BBL    4: UBL    5: MBL
  *
  */
-#define ENABLE_UBL_VALUE 2
+#define ENABLE_BL_VALUE 1
 
 /**
- * Enable friendly probe offset language.
+ * Enable friendly probe offset language
  *
  * Decrease/increase and "-" & "+" icons are replaced with down/up and friendly icons
  *
@@ -270,11 +306,11 @@
  * Manual Leveling
  * Move to four corner points to Leveling manually (Point 1, Point 2, Point 3, Point 4)
  */
-#define LEVELING_EDGE_DISTANCE     20    // Inset distance from bed's edge for calculating leveling point location.
-#define LEVELING_POINT_Z           0.2f  // Z-axis position when nozzle stays for leveling
-#define LEVELING_POINT_MOVE_Z      10.0f // Z-axis position when nozzle move to next point
-#define LEVELING_POINT_XY_FEEDRATE 6000  // (mm/min) X and Y axes move feedrate
-#define LEVELING_POINT_Z_FEEDRATE  600   // (mm/min) Z axis move feedrate
+#define LEVELING_EDGE_DISTANCE        20  // Inset distance from bed's edge for calculating leveling point location.
+#define LEVELING_POINT_Z            0.2f  // Z-axis position when nozzle stays for leveling
+#define LEVELING_POINT_MOVE_Z      10.0f  // Z-axis position when nozzle move to next point
+#define LEVELING_POINT_XY_FEEDRATE  6000  // (mm/min) X and Y axes move feedrate
+#define LEVELING_POINT_Z_FEEDRATE    600  // (mm/min) Z axis move feedrate
 
 #define LEVELING_EDGE_DISTANCE_DISPLAY_ID   "X/Y"
 #define LEVELING_EDGE_DISTANCE_MIN          0
@@ -289,7 +325,7 @@
 /**
  * Z Fade
  */
-#define Z_FADE_MIN_VALUE     0.0f
+#define Z_FADE_MIN_VALUE      0.0f
 #define Z_FADE_MAX_VALUE     20.0f
 #define Z_FADE_DEFAULT_VALUE 10.0f
 
@@ -297,16 +333,72 @@
  * Probe Offset
  */
 #define PROBE_OFFSET_MIN_VALUE     -20.0f
-#define PROBE_OFFSET_MAX_VALUE     20.0f
-#define PROBE_OFFSET_DEFAULT_VALUE 0.0f
+#define PROBE_OFFSET_MAX_VALUE      20.0f
+#define PROBE_OFFSET_DEFAULT_VALUE   0.0f
+
+/**
+ * Home Offset
+ */
+#define HOME_Z_OFFSET_MIN_VALUE     -20.0f
+#define HOME_Z_OFFSET_MAX_VALUE      20.0f
+#define HOME_Z_OFFSET_DEFAULT_VALUE   0.0f
 
 /**
  * Babystep
  */
 #define BABYSTEP_MIN_VALUE     -5.0f
-#define BABYSTEP_MAX_VALUE     5.0f
-#define BABYSTEP_DEFAULT_VALUE 0.0f
-#define BABYSTEP_MAX_UNIT      1.0f
+#define BABYSTEP_MAX_VALUE      5.0f
+#define BABYSTEP_DEFAULT_VALUE  0.0f
+#define BABYSTEP_MAX_UNIT       1.0f
+
+/**
+ * Mesh Editor settings
+ */
+
+// Set the maximum number of grid points per dimension
+//
+// NOTE: It must be in range 1 - 15
+//
+#define MESH_GRID_MAX_POINTS_X 10
+#define MESH_GRID_MAX_POINTS_Y 10
+
+// Set the color used for drawing the mesh with the minimun and maximum value in the grid
+//
+// Options: 0: WHITE,      1: BLACK,       2: RED,     3: GREEN,     4: BLUE,   5: CYAN,
+//          6: MAGENTA,    7: YELLOW,      8: ORANGE,  9: PURPLE,   10: LIME,  11: BROWN,
+//         12: DARKBLUE,  13: DARKGREEN,  14: GRAY,   15: DARKGRAY
+//
+#define MESH_MIN_COLOR 7
+#define MESH_MAX_COLOR 2
+
+// Enable keyboard drawn on left side
+//
+// If disabled, the keyboard is drawn on right side
+//
+// Options:  0: Disabled    1: Enabled
+//
+#define MESH_LEFT_KEYBOARD 0
+
+/**
+ * Terminal settings
+ */
+
+// Enable keyboard color layout for the Terminal menu
+//
+// If standard, the keyboard is drawn using the standard configurable background and font colors.
+// If alternative, the keyboard is drawn using the alternative embedded colors (white and black colors).
+//
+// Options:  0: standard 1    1: standard 2    2: alternative
+//
+#define TERMINAL_KEYBOARD_COLOR_LAYOUT 0
+
+// Enable keyboard QWERTY layout for the Terminal menu with at least 10 columns
+//
+// If enabled, the QWERTY keyboard layout is used
+//
+// Options:  0: Disabled    1: Enabled
+//
+#define TERMINAL_KEYBOARD_QWERTY_LAYOUT 1
 
 /**
  * PID autotune
@@ -334,9 +426,9 @@
 // update the icons from alternate icon folder
 #define ALTERNATIVE_MOVE_MENU
 
-// Enable Unified Move Menu
-// Move, Home, Extrude, ABL at one Place and bring G-code Menu on Home Menu
-#define UNIFIED_MENU true //for unified menu: true | for classic menu: false
+// Enable Status Screen
+// Enable this to show status screen as the default home screen. Disabling it will show a static menu.
+#define ENABLE_STATUS_SCREEN true //to enabled: true | to disabled: false
 
 /**
  * SD support
@@ -362,7 +454,7 @@
 #define POWER_LOSS_ZRAISE 10
 
 // Prevent extrusion if the temperature is below set temperature
-#define PREVENT_COLD_EXTRUSION_MINTEMP 170
+#define PREVENT_COLD_EXTRUSION_MINTEMP 180
 
 /**
  * Maximum hotend temperature of automatic shut down after printing.
@@ -436,6 +528,6 @@
 #define PRINT_END_GCODE "G90\nG1 E-4\nG92 E0\nM18\n" // Switch to absolute positioning, reduce filament pressure by performing small retract, reset extruder position, disable steppers
 
 // Cancel G-code - run this G-code after canceling print
-#define PRINT_CANCEL_GCODE "G28 XY R10\n" // Home XY and raise Z 10mm
+#define PRINT_CANCEL_GCODE "M104 S0\nM140 S0\nG28 XY R10\nM107\nM18\n" // Home XY and raise Z 10mm
 
 #endif
