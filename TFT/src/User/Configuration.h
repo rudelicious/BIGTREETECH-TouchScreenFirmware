@@ -1,6 +1,6 @@
 #ifndef _CONFIGURATION_H_
 #define _CONFIGURATION_H_
-#define CONFIG_VERSION 20210311
+#define CONFIG_VERSION 20210411
 
 //===========================================================================
 //============================= General Settings ============================
@@ -34,7 +34,7 @@
  *
  * Options: [2400: 0, 9600: 1, 19200: 2, 38400: 3, 57600: 4, 115200: 5, 250000: 6, 500000: 7, 1000000: 8]
  */
-#define BAUDRATE 5  // Default: 5
+#define BAUDRATE 6  // Default: 5
 
 /**
  * Default Primary Language (for Touch-Mode only)
