@@ -1,6 +1,6 @@
 #ifndef _CONFIGURATION_H_
 #define _CONFIGURATION_H_
-#define CONFIG_VERSION 20210311
+#define CONFIG_VERSION 20210411
 
 //===========================================================================
 //============================= General Settings ============================
